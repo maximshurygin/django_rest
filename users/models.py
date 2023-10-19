@@ -12,7 +12,7 @@ class User(AbstractUser):
                              **NULLABLE)
     country = models.CharField(max_length=35, verbose_name='Страна',
                                **NULLABLE)
-    avatar = models.ImageField(upload_to='users/', verbose_name='Аватар',
+    avatar = models.ImageField(upload_to='users_images/', verbose_name='Аватар',
                                **NULLABLE)
 
     USERNAME_FIELD = "email"
