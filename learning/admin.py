@@ -7,11 +7,11 @@ from learning.models import Course, Lesson
 
 @admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):
-    list_display = ['id', 'title', 'image', 'description']
+    list_display = ['id', 'title', 'image', 'description', 'owner']
     search_fields = ('title', 'description',)
 
 
 @admin.register(Lesson)
 class LessonAdmin(admin.ModelAdmin):
-    list_display = ['id', 'title', 'description', 'image', 'video_url', 'course']
+    list_display = ['id', 'title', 'description', 'image', 'video_url', 'course', 'owner']
     search_fields = ('title', 'description',)
