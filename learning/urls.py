@@ -1,11 +1,10 @@
 from django.urls import path
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from learning.apps import LearningConfig
 from rest_framework.routers import DefaultRouter
 
 from learning.views import CourseViewSet, LessonCreateAPIView, LessonListAPIView, LessonRetrieveAPIView, \
-    LessonUpdateAPIView, LessonDestroyAPIView, PaymentsListAPIView
+    LessonUpdateAPIView, LessonDestroyAPIView, PaymentsListAPIView, subscribe, unsubscribe
 
 app_name = LearningConfig.name
 
@@ -19,4 +18,6 @@ urlpatterns = [
                   path('lesson/update/<int:pk>/', LessonUpdateAPIView.as_view(), name='lesson-update'),
                   path('lesson/delete/<int:pk>/', LessonDestroyAPIView.as_view(), name='lesson-delete'),
                   path('payments/', PaymentsListAPIView.as_view(), name='payments-list'),
+                  path('subscribe/<int:course_id>/', subscribe, name='subscribe'),
+                  path('unsubscribe/<int:course_id>/', unsubscribe, name='unsubscribe'),
               ] + router.urls

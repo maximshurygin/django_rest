@@ -8,6 +8,7 @@ class Course(models.Model):
     image = models.ImageField(upload_to='course_images/', verbose_name='Превью',
                               blank=True, null=True)
     description = models.TextField(verbose_name='Описание')
+    video_url = models.URLField(verbose_name='Ссылка на видео', blank=True, null=True)
     owner = models.ForeignKey(User, on_delete=models.CASCADE,
                               blank=True, null=True, verbose_name='Владелец')
 
@@ -59,3 +60,12 @@ class Payments(models.Model):
 
     def __str__(self):
         return f'Платеж от {self.user.email} на сумму {self.paid_amount}'
+
+
+class Subscription(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = 'Подписка'
+        verbose_name_plural = 'Подписки'

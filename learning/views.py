@@ -1,9 +1,13 @@
+from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, generics
+from rest_framework import viewsets, generics, status
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.filters import OrderingFilter
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
-from learning.models import Course, Lesson, Payments
+from learning.models import Course, Lesson, Payments, Subscription
+from learning.paginators import LearningPaginator
 from learning.permissions import IsNotModerator, IsOwnerOrModerator, CustomViewSetPermissions
 from learning.serializers import CourseSerializer, LessonSerializer, PaymentsSerializer
 
@@ -12,9 +16,13 @@ class CourseViewSet(viewsets.ModelViewSet):
     serializer_class = CourseSerializer
     queryset = Course.objects.all()
     permission_classes = [IsAuthenticated, CustomViewSetPermissions]
+    pagination_class = LearningPaginator
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
+
+    def get_queryset(self):
+        return Course.objects.all().order_by('id')
 
 
 class LessonCreateAPIView(generics.CreateAPIView):
@@ -29,6 +37,10 @@ class LessonListAPIView(generics.ListAPIView):
     serializer_class = LessonSerializer
     queryset = Lesson.objects.all()
     permission_classes = [IsAuthenticated, IsOwnerOrModerator]
+    pagination_class = LearningPaginator
+
+    def get_queryset(self):
+        return Lesson.objects.all().order_by('id')
 
 
 class LessonRetrieveAPIView(generics.RetrieveAPIView):
@@ -56,3 +68,22 @@ class PaymentsListAPIView(generics.ListAPIView):
     filter_backends = [DjangoFilterBackend, OrderingFilter]
     filterset_fields = ('paid_course', 'paid_lesson', 'payment_method')
     ordering_fields = ('payment_date',)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def subscribe(request, course_id):
+    course = get_object_or_404(Course, id=course_id)
+    subscription, created = Subscription.objects.get_or_create(user=request.user, course=course)
+    if created:
+        return Response(status=status.HTTP_201_CREATED)
+    return Response(status=status.HTTP_200_OK)
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def unsubscribe(request, course_id):
+    course = get_object_or_404(Course, id=course_id)
+    subscription = get_object_or_404(Subscription, user=request.user, course=course)
+    subscription.delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
