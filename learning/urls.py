@@ -4,7 +4,8 @@ from learning.apps import LearningConfig
 from rest_framework.routers import DefaultRouter
 
 from learning.views import CourseViewSet, LessonCreateAPIView, LessonListAPIView, LessonRetrieveAPIView, \
-    LessonUpdateAPIView, LessonDestroyAPIView, PaymentsListAPIView, subscribe, unsubscribe
+    LessonUpdateAPIView, LessonDestroyAPIView, PaymentsListAPIView, subscribe, unsubscribe, create_payment, \
+    retrieve_payment
 
 app_name = LearningConfig.name
 
@@ -20,4 +21,6 @@ urlpatterns = [
                   path('payments/', PaymentsListAPIView.as_view(), name='payments-list'),
                   path('subscribe/<int:course_id>/', subscribe, name='subscribe'),
                   path('unsubscribe/<int:course_id>/', unsubscribe, name='unsubscribe'),
+                  path('create-payment/', create_payment, name='create-payment'),
+                  path('retrieve-payment/<str:payment_intent_id>/', retrieve_payment, name='retrieve-payment'),
               ] + router.urls

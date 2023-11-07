@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, generics, status
@@ -6,10 +7,15 @@ from rest_framework.filters import OrderingFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from config import settings
 from learning.models import Course, Lesson, Payments, Subscription
 from learning.paginators import LearningPaginator
 from learning.permissions import IsNotModerator, IsOwnerOrModerator, CustomViewSetPermissions
 from learning.serializers import CourseSerializer, LessonSerializer, PaymentsSerializer
+import stripe
+from stripe.error import StripeError
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
 class CourseViewSet(viewsets.ModelViewSet):
@@ -87,3 +93,25 @@ def unsubscribe(request, course_id):
     subscription = get_object_or_404(Subscription, user=request.user, course=course)
     subscription.delete()
     return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+def create_payment(request):
+    try:
+        amount = 1000
+        currency = 'usd'
+        payment_intent = stripe.PaymentIntent.create(
+            amount=amount,
+            currency=currency,
+            payment_method_types=['card'],
+        )
+        return JsonResponse({'clientSecret': payment_intent['client_secret']})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=403)
+
+
+def retrieve_payment(request, payment_intent_id):
+    try:
+        payment_intent = stripe.PaymentIntent.retrieve(payment_intent_id)
+        return JsonResponse(payment_intent)
+    except StripeError as e:
+        return JsonResponse({'error': str(e)}, status=400)
