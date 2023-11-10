@@ -28,12 +28,12 @@ class CourseViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
 
-    def get_queryset(self):
-        return Course.objects.all().order_by('id')
-
     def perform_update(self, serializer):
         super().perform_update(serializer)
         send_update_email.delay(self.get_object().id)
+
+    def get_queryset(self):
+        return Course.objects.all().order_by('id')
 
 
 class LessonCreateAPIView(generics.CreateAPIView):
@@ -120,4 +120,3 @@ def retrieve_payment(request, payment_intent_id):
         return JsonResponse(payment_intent)
     except StripeError as e:
         return JsonResponse({'error': str(e)}, status=400)
-
