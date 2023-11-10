@@ -14,6 +14,7 @@ from learning.permissions import IsNotModerator, IsOwnerOrModerator, CustomViewS
 from learning.serializers import CourseSerializer, LessonSerializer, PaymentsSerializer
 import stripe
 from stripe.error import StripeError
+from .tasks import send_update_email
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -29,6 +30,10 @@ class CourseViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return Course.objects.all().order_by('id')
+
+    def perform_update(self, serializer):
+        super().perform_update(serializer)
+        send_update_email.delay(self.get_object().id)
 
 
 class LessonCreateAPIView(generics.CreateAPIView):
@@ -115,3 +120,4 @@ def retrieve_payment(request, payment_intent_id):
         return JsonResponse(payment_intent)
     except StripeError as e:
         return JsonResponse({'error': str(e)}, status=400)
+
