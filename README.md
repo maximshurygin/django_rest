@@ -9,23 +9,6 @@
 - Celery
 - Redis
 
-## Документация API
-
-Документация доступна по ссылке:
-
-- [http://127.0.0.1:8000/docs/](http://127.0.0.1:8000/docs/)
-
-## CORS
-
-Чтобы изменить настройки CORS, отредактируйте `settings.py`:
-
-```
-CORS_ALLOWED_ORIGINS = [
-    "https://example-frontend.com",
-    "https://another-frontend.com",
-]
-```
-
 ## Инструкция по развертыванию:
 
 Склонировать репозиторий в IDE
